@@ -1,0 +1,84 @@
+use ChrisHarrison\VoGenerator\ValueObject;
+use InvalidArgumentException;
+
+use function array_map;
+
+class {{ name }} implements ValueObject
+{
+    private $set;
+
+    protected function __construct(?array $set)
+    {
+        $this->set = $set;
+        foreach ($this->set ?? [] as $value) {
+            if (!$value instanceof {{ holds }}) {
+                throw new InvalidArgumentException('{{ name }} can only contain {{ holds }}');
+            }
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNull(): bool
+    {
+        return $this->set === null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNotNull(): bool
+    {
+        return !$this->isNull();
+    }
+
+    /**
+     * @param array $native
+     * @return static
+     */
+    public static function fromNative($native)
+    {
+        return new static(array_map(function ($value) {
+            return {{ holds }}::fromNative($value);
+        }, $native));
+    }
+
+    /**
+     * @return static
+     */
+    public static function null()
+    {
+        return new static(null);
+    }
+
+    /**
+     * @return array
+     */
+    public function toNative()
+    {
+        return array_map(function ({{ holds }} $value) {
+            return $value->toNative();
+        }, $this->set);
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return $this->set;
+    }
+
+    /**
+     * @param array $native
+     * @return static
+     */
+    public function whenNull($native)
+    {
+        if ($this->isNull()) {
+            return static::fromNative($native);
+        }
+        return clone $this;
+    }
+}

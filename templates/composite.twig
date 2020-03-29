@@ -1,0 +1,116 @@
+use ChrisHarrison\VoGenerator\ValueObject;
+use ReflectionMethod;
+use ReflectionParameter;
+
+class {{ name }} implements ValueObject
+{
+    {% for property in properties %}
+    private ${{ property.propertyName }};
+    {% endfor %}
+
+    protected function __construct(
+        {% for property in properties %}
+        {{ property.name }} ${{ property.propertyName }}{% if loop.last != true %},{% endif %}
+        {% endfor %}
+    ) {
+        {% for property in properties %}
+        $this->{{ property.propertyName }} = ${{ property.propertyName }};
+        {% endfor %}
+    }
+
+    {% for property in properties %}
+    public function {{ property.propertyName }}(): {{ property.name }}
+    {
+        return $this->{{ property.propertyName }};
+    }
+    {% endfor %}
+
+    {% for property in properties %}
+    /**
+    * @return static
+    */
+    public function with{{ property.propertyName|capitalize }}({{ property.name }} ${{ property.propertyName }})
+    {
+        $clone = clone $this;
+        $clone->{{ property.propertyName }} = ${{ property.propertyName }};
+        return $clone;
+    }
+    {% endfor %}
+
+    /**
+     * @return bool
+     */
+    public function isNull(): bool
+    {
+        $subValues = $this->propertiesToArray();
+
+        foreach ($subValues as $value) {
+            /* @var ValueObject $value */
+            if (!$value->isNull()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNotNull(): bool
+    {
+        return !$this->isNull();
+    }
+
+    /**
+     * @return array
+     */
+    public function toNative()
+    {
+        return array_map(function (ValueObject $valueObject) {
+            return $valueObject->toNative();
+        }, static::properties());
+    }
+
+    /**
+     * @param ?array $native
+     * @return static
+     */
+    public static function fromNative($native)
+    {
+        $args = [];
+        foreach (static::properties() as $type => $name) {
+            $args[] = $type::fromNative($native[$name]);
+        }
+        return new static(...$args);
+    }
+
+    /**
+     * @return array
+     */
+    private static function properties(): array
+    {
+        $params = (new ReflectionMethod(static::class, '__construct'))->getParameters();
+        return array_reduce($params, function (array $acc, ReflectionParameter $param) {
+            $acc[$param->getClass()->getName()] = $param->getName();
+            return $acc;
+        }, []);
+    }
+
+    public static function null()
+    {
+        return static::fromNative([]);
+    }
+
+    /**
+     * @param ?array $native
+     * @return static
+     */
+    public function whenNull($native)
+    {
+        if ($this->isNull()) {
+            return static::fromNative($native);
+        }
+        return clone $this;
+    }
+}

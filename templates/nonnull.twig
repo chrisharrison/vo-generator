@@ -1,0 +1,13 @@
+use ChrisHarrison\VoGenerator\Exceptions\NonNullValueObjectCannotBeNull;
+
+final class {{  name }} extends {{ extendedFrom }}
+{
+    protected function __construct($value)
+    {
+        parent::__construct($value);
+
+        if ($this->isNull()) {
+            throw new NonNullValueObjectCannotBeNull(get_class($this));
+        }
+    }
+}

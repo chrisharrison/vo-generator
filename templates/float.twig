@@ -1,0 +1,64 @@
+use ChrisHarrison\VoGenerator\ValueObject;
+
+class FloatValue implements ValueObject
+{
+    private $value;
+
+    protected function __construct(?float $value)
+    {
+        $this->value = $value;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNull(): bool
+    {
+        return $this->value === null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNotNull(): bool
+    {
+        return !$this->isNull();
+    }
+
+    /**
+     * @return static
+     */
+    public static function null()
+    {
+        return new self(null);
+    }
+
+    /**
+     * @return float|null
+     */
+    public function toNative()
+    {
+        return $this->value;
+    }
+
+    /**
+     * @param ?float $native
+     * @return static
+     */
+    public static function fromNative($native)
+    {
+        return new static($native);
+    }
+
+    /**
+     * @param ?float $native
+     * @return static
+     */
+    public function whenNull($native)
+    {
+        if ($this->isNull()) {
+            return static::fromNative($native);
+        }
+        return clone $this;
+    }
+}

@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+
+use ChrisHarrison\VoGenerator\App\DefaultApp;
+use ChrisHarrison\VoGenerator\CodeStreamer\CodeStreamer;
+use ChrisHarrison\VoGenerator\CodeStreamOut\MultiFile;
+use ChrisHarrison\VoGenerator\Registry\Registry;
+
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$app = DefaultApp::singleton();
+
+$app->get(CodeStreamer::class)->stream(
+    $app->get(Registry::class),
+    new MultiFile($app->get('rootPath') . '/.vo.code')
+);

@@ -1,0 +1,90 @@
+use ChrisHarrison\VoGenerator\ValueObject;
+use InvalidArgumentException;
+
+use function get_called_class;
+use function sprintf;
+use function strtoupper;
+
+class {{ name }} implements ValueObject
+{
+    private $value;
+
+    protected function __construct(?string $value)
+    {
+        $this->value = $value ? strtoupper($value) : null;
+        if (
+            !in_array($this->value, [
+            {% for value in values %}
+            '{{ value }}',
+            {% endfor %}
+            ])
+        ) {
+            throw new InvalidArgumentException(
+                sprintf('%s is not a valid enum value for: %s', $this->value, get_called_class())
+            );
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNull(): bool
+    {
+        return $this->value === null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNotNull(): bool
+    {
+        return !$this->isNull();
+    }
+
+    /**
+     * @param ?string $native
+     * @return static
+     */
+    public static function fromNative($native)
+    {
+        return new static($native);
+    }
+
+    /**
+     * @return string|null
+     */
+    public function toNative()
+    {
+        return $this->value;
+    }
+
+    /**
+     * @return static
+     */
+    public static function null()
+    {
+        return new static(null);
+    }
+
+    /**
+     * @param ?string $native
+     * @return static
+     */
+    public function whenNull($native)
+    {
+        if ($this->isNull()) {
+            return static::fromNative($native);
+        }
+        return clone $this;
+    }
+
+    {% for value in values %}
+        /**
+        * @return static
+        */
+        public static function {{ value }}()
+        {
+        return new static('{{ value }}');
+        }
+    {% endfor %}
+}
