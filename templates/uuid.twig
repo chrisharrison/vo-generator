@@ -1,4 +1,6 @@
 use ChrisHarrison\VoGenerator\ValueObject;
+use InvalidArgumentException;
+use Ramsey\Uuid\Uuid;
 
 class {{ name }} implements ValueObject
 {
@@ -11,6 +13,19 @@ class {{ name }} implements ValueObject
     protected function __construct(?string $value)
     {
         $this->value = $value;
+        if ($this->value !== null && !Uuid::isValid($this->value)) {
+            throw new InvalidArgumentException(
+                sprintf('A {{ name }} can only be instantiated with a valid UUID. %s given', $this->value)
+            );
+        }
+    }
+
+    /**
+    * @return static
+    */
+    public static function generate()
+    {
+        return new static(Uuid::uuid4()->toString());
     }
 
     /**

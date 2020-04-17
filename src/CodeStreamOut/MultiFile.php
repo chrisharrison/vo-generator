@@ -8,14 +8,6 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 
-use function file_put_contents;
-use function mkdir;
-use function strlen;
-use function strpos;
-use function unlink;
-
-use const PHP_EOL;
-
 final class MultiFile implements CodeStreamOut
 {
     private $path;

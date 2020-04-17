@@ -6,7 +6,7 @@ use ChrisHarrison\VoGenerator\CodeStreamer\CodeStreamer;
 use ChrisHarrison\VoGenerator\CodeStreamOut\MultiFile;
 use ChrisHarrison\VoGenerator\Registry\Registry;
 
-require_once(__DIR__ . '/vendor/autoload.php');
+require_once(__DIR__ . '/../../../vendor/autoload.php');
 
 $app = DefaultApp::singleton();
 

@@ -4,17 +4,12 @@ declare(strict_types=1);
 
 namespace ChrisHarrison\VoGenerator\Registry;
 
+use ChrisHarrison\VoGenerator\Definition\Definition;
 use ChrisHarrison\VoGenerator\Definition\DefinitionName;
 use ChrisHarrison\VoGenerator\Definition\Definitions;
 use ChrisHarrison\VoGenerator\ExtensionHandler\ExtensionHandler;
 use ChrisHarrison\VoGenerator\Renderer\Renderer;
 use ChrisHarrison\VoGenerator\TypeHandler\TypeHandler;
-
-use function array_key_exists;
-use function pathinfo;
-use function str_replace;
-
-use const PATHINFO_BASENAME;
 
 final class DefaultRegistry implements Registry
 {
@@ -22,6 +17,7 @@ final class DefaultRegistry implements Registry
     private $extensionHandler;
     private $typeHandler;
     private $renderer;
+    private $namespace;
 
     private $position;
 
@@ -29,41 +25,50 @@ final class DefaultRegistry implements Registry
         Definitions $definitions,
         ExtensionHandler $extensionHandler,
         TypeHandler $typeHandler,
-        Renderer $renderer
+        Renderer $renderer,
+        string $namespace
     ) {
         $this->definitions = $extensionHandler->extend($definitions);
         $this->extensionHandler = $extensionHandler;
         $this->typeHandler = $typeHandler;
         $this->renderer = $renderer;
+        $this->namespace = $namespace;
 
         $this->position = 0;
     }
 
-    public function resolve(string $name): ?string
+    public function resolve(string $fullClassName): ?string
     {
-        $definitionName = $this->getDefinitionNameFromFQN($name);
+        $parts = explode('\\', $fullClassName);
+        if (count($parts) !== 2) {
+            return null;
+        }
+        if ($parts[0] !== $this->namespace) {
+            return null;
+        }
+        $definitionName = new DefinitionName($parts[1]);
         $definition = $this->definitions->get($definitionName);
         if ($definition === null) {
             return null;
         }
 
+        $typedDefinition = $this->typeHandler->handle($definition);
+
         return $this->renderer->render(
-            $definition->type()->template(),
-            $this->typeHandler->handle($definition)
+            $typedDefinition->template(),
+            $typedDefinition->payload()
         );
     }
 
-    private function getDefinitionNameFromFQN(string $fqn): DefinitionName
+    public function getDefinition(DefinitionName $name): Definition
     {
-        return new DefinitionName(
-            pathinfo(str_replace('\\', '/', $fqn), PATHINFO_BASENAME)
-        );
+        return $this->definitions->get($name);
     }
 
     public function current()
     {
         return $this->resolve(
-            $this->definitions->toArray()[$this->position]->name()->toString()
+            $this->namespace . '\\' . $this->definitions->toArray()[$this->position]->name()->toString()
         );
     }
 

@@ -4,36 +4,41 @@ declare(strict_types=1);
 
 namespace ChrisHarrison\VoGenerator\Definition;
 
-use ChrisHarrison\VoGenerator\Type\Type;
-
 final class Definition
 {
-    private $name;
-    private $type;
-    private $additionalProperties;
+    private $payload;
 
-    public function __construct(
-        DefinitionName $name,
-        Type $type,
-        array $additionalProperties
-    ) {
-        $this->name = $name;
-        $this->type = $type;
-        $this->additionalProperties = $additionalProperties;
+    public function __construct(array $payload)
+    {
+        $this->payload = $payload;
+    }
+
+    public function payload(): array
+    {
+        return $this->payload;
     }
 
     public function name(): DefinitionName
     {
-        return $this->name;
+        return new DefinitionName($this->payload['name']);
     }
 
-    public function type(): Type
+    public function type(): string
     {
-        return $this->type;
+        return $this->payload['type'];
     }
 
-    public function additionalProperties(): array
+    public function template(): string
     {
-        return $this->additionalProperties;
+        return $this->payload['template'];
+    }
+    public function traits(): array
+    {
+        return $this->payload['traits'] ?? [];
+    }
+
+    public function withMergedPayload(array $payload): Definition
+    {
+        return new Definition(array_merge($this->payload, $payload));
     }
 }

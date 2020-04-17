@@ -8,8 +8,6 @@ use ChrisHarrison\VoGenerator\Definition\Definition;
 use ChrisHarrison\VoGenerator\Definition\Definitions;
 use ChrisHarrison\VoGenerator\Extension\Extension;
 
-use function array_reduce;
-
 final class DefaultExtensionHandler implements ExtensionHandler
 {
     private $extensions;

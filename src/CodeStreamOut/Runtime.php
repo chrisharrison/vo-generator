@@ -4,34 +4,38 @@ declare(strict_types=1);
 
 namespace ChrisHarrison\VoGenerator\CodeStreamOut;
 
-use ChrisHarrison\VoGenerator\Exceptions\EvaledCodeFailure;
-use Throwable;
-
-use function implode;
-
 final class Runtime implements CodeStreamOut
 {
-    private $buffer;
+    private $namespace;
 
     public function setup(string $namespace): void
     {
-        $this->buffer = [
-            sprintf('namespace %s;', $namespace),
-        ];
+        $this->namespace = $namespace;
     }
 
     public function out(string $code): void
     {
-        $this->buffer[] = $code;
+        $out = [
+            '<?php',
+            '',
+            'declare(strict_types=1);',
+            '',
+            sprintf('namespace %s;', $this->namespace),
+            '',
+            $code,
+        ];
+        $first = strpos($code, 'class ') + strlen('class ');
+        $last = strpos($code, ' ', $first);
+        $filename = substr($code, $first, $last - $first);
+        $tmpPath = sys_get_temp_dir() . '/' . $filename . '.php';
+        file_put_contents(
+            $tmpPath,
+            implode(PHP_EOL, $out)
+        );
+        require($tmpPath);
     }
 
     public function finish(): void
     {
-        $code = implode('', $this->buffer);
-        try {
-            eval($code);
-        } catch (Throwable $e) {
-            throw new EvaledCodeFailure($code, $e);
-        }
     }
 }

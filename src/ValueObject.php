@@ -17,6 +17,18 @@ interface ValueObject
     public function isNotNull(): bool;
 
     /**
+     * @param ValueObject $compare
+     * @return bool
+     */
+    public function isSame(ValueObject $compare): bool;
+
+    /**
+     * @param ValueObject $compare
+     * @return bool
+     */
+    public function isNotSame(ValueObject $compare): bool;
+
+    /**
      * @param mixed $native
      * @return mixed
      */

@@ -2,6 +2,10 @@ use ChrisHarrison\VoGenerator\ValueObject;
 
 class {{ name }} implements ValueObject
 {
+{% for trait in traits %}
+    use \{{ trait }};
+{%  endfor %}
+
     private $value;
 
     protected function __construct(?bool $value)
@@ -60,5 +64,41 @@ class {{ name }} implements ValueObject
             return static::fromNative($native);
         }
         return clone $this;
+    }
+
+    /**
+     * @return static
+     */
+    public static function true()
+    {
+        return new static(true);
+    }
+
+    /**
+     * @return static
+     */
+    public static function false()
+    {
+        return new static(false);
+    }
+
+    public function isTrue(): bool
+    {
+        return $this->value === true;
+    }
+
+    public function isFalse(): bool
+    {
+        return !$this->isTrue();
+    }
+
+    public function isSame(ValueObject $compare): bool
+    {
+        return $this->toNative() === $compare->toNative();
+    }
+
+    public function isNotSame(ValueObject $compare): bool
+    {
+        return !$this->isSame($compare);
     }
 }

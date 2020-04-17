@@ -6,10 +6,6 @@ namespace ChrisHarrison\VoGenerator\Definition;
 
 use InvalidArgumentException;
 
-use function array_key_exists;
-use function sprintf;
-use function var_dump;
-
 final class Definitions
 {
     private $definitions;

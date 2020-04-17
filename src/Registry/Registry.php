@@ -8,5 +8,5 @@ use Iterator;
 
 interface Registry extends Iterator
 {
-    public function resolve(string $name): ?string;
+    public function resolve(string $fullClassName): ?string;
 }

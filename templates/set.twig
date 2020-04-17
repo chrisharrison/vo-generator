@@ -1,19 +1,38 @@
-use ChrisHarrison\VoGenerator\ValueObject;
 use InvalidArgumentException;
+use ChrisHarrison\VoGenerator\EntitySet;
+use ChrisHarrison\VoGenerator\ValueObject;
 
 use function array_map;
 
-class {{ name }} implements ValueObject
+class {{ name }} implements {{ implements|join(', ') }}
 {
+{% for trait in traits %}
+    use \{{ trait }};
+{%  endfor %}
+
     private $set;
 
-    protected function __construct(?array $set)
+    protected function __construct(array $set)
     {
         $this->set = $set;
-        foreach ($this->set ?? [] as $value) {
+        foreach ($this->set as $value) {
             if (!$value instanceof {{ holds }}) {
                 throw new InvalidArgumentException('{{ name }} can only contain {{ holds }}');
             }
+        }
+        $this->checkUniqueIds();
+    }
+
+    private function checkUniqueIds(): void
+    {
+        if (!is_a($this, EntitySet::class)) {
+            return;
+        }
+        $ids = array_map(function ({{ holds }} $item) {
+            return $item->id()->toNative();
+        }, $this->set);
+        if (count($ids) !== count(array_unique($ids))) {
+            throw new InvalidArgumentException('{{ name }} must have unique IDs');
         }
     }
 
@@ -22,7 +41,7 @@ class {{ name }} implements ValueObject
      */
     public function isNull(): bool
     {
-        return $this->set === null;
+        return count($this->set) === 0;
     }
 
     /**
@@ -40,8 +59,11 @@ class {{ name }} implements ValueObject
     public static function fromNative($native)
     {
         return new static(array_map(function ($value) {
+            if ($value instanceof ValueObject) {
+                return $value;
+            }
             return {{ holds }}::fromNative($value);
-        }, $native));
+        }, $native ?? []));
     }
 
     /**
@@ -49,7 +71,7 @@ class {{ name }} implements ValueObject
      */
     public static function null()
     {
-        return new static(null);
+        return new static([]);
     }
 
     /**
@@ -63,7 +85,7 @@ class {{ name }} implements ValueObject
     }
 
     /**
-     * @return array
+     * @return {{ holds }}[]
      */
     public function toArray(): array
     {
@@ -80,5 +102,179 @@ class {{ name }} implements ValueObject
             return static::fromNative($native);
         }
         return clone $this;
+    }
+
+    public function add({{ holds }} $addition): {{ name }}
+    {
+        $clone = clone $this;
+        $clone->set[] = $addition;
+        return $clone;
+    }
+
+    public function addMany({{ name }} $set): {{ name }}
+    {
+        $clone = clone $this;
+        $clone->set = array_merge($this->set, $set->toArray());
+        return $clone;
+    }
+
+    {% for property, type in innerProperties %}
+    public function getBy{{ property|ucfirst }}(\{{ type }} $value): {{ holds }}
+    {
+        return array_reduce($this->set, function ({{ holds }} $acc, {{ holds }} $item) use ($value) {
+            if ($acc->isNull() && $item->{{ property }}()->isSame($value)) {
+                return $item;
+            }
+            return $acc;
+        }, {{ holds }}::null());
+    }
+    {% endfor %}
+
+    {% for property, type in innerProperties %}
+    public function removeBy{{ property|ucfirst }}(\{{ type }} $removeValue): {{ name }}
+    {
+        return new {{ name }}(array_values(array_filter($this->set, function ({{ holds }} $value) use ($removeValue) {
+            return $value->{{ property }}()->isNotSame($removeValue);
+        })));
+    }
+    {% endfor %}
+
+    public function isSame(ValueObject $compare): bool
+    {
+        return $this->toNative() == $compare->toNative();
+    }
+
+    public function isNotSame(ValueObject $compare): bool
+    {
+        return !$this->isSame($compare);
+    }
+
+    public function count()
+    {
+        return count($this->set);
+    }
+
+    public function atIndex(int $index): {{ holds }}
+    {
+        return $this->set[$index];
+    }
+
+    public function map(callable $mapper): {{ name }}
+    {
+        $items = [];
+        foreach ($this->set as $key => $item) {
+            $items[] = $mapper($item, $key);
+        }
+        return new static($items);
+    }
+
+    public function find(callable $finder): {{ name }}
+    {
+        foreach ($this->set as $item) {
+            if ($finder($item)) {
+                return $item;
+            }
+        }
+        return {{ name }}::null();
+    }
+
+    public function indexOf({{ holds }} $compare): ?int
+    {
+        $match = null;
+        foreach ($this->set as $key => $item) {
+            if ($item->isSame($compare)) {
+                $match = $key;
+            }
+        }
+        return $match;
+    }
+
+    public function has({{ holds }} $compare): bool
+    {
+        return !!$this->indexOf($compare);
+    }
+
+    public function hasAll({{ name }} $compare): bool
+    {
+        $matches = 0;
+        foreach ($compare->toArray() as $item) {
+            if ($this->has($item)) {
+                $matches++;
+            }
+        }
+        return $matches === $compare->count();
+    }
+
+    public function hasAny({{ name }} $compare): bool
+    {
+        foreach ($compare->toArray() as $item) {
+            if ($this->has($item)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function doesntHave({{ holds }} $compare): bool
+    {
+        return !$this->has($compare);
+    }
+
+    public function doesntHaveAll({{ name }} $compare): bool
+    {
+        return !$this->hasAll($compare);
+    }
+
+    public function filter(callable $filter): {{ name }}
+    {
+        $items = [];
+        foreach ($this->set as $key => $item) {
+            if ($filter($item, $key)) {
+                $items[] = $item;
+            }
+        }
+        return new static($items);
+    }
+
+    public function remove({{ holds }} $toRemove): {{ name }}
+    {
+        $out = $this->toArray();
+        foreach ($this->set as $key => $item) {
+            if ($item->isSame($toRemove)) {
+                unset($out[$key]);
+                break;
+            }
+        }
+        return new static($out);
+    }
+
+    public function removeMany({{ name }} $toRemove): {{ name }}
+    {
+        $out = clone $this;
+        foreach ($toRemove->toArray() as $item) {
+            $out = $out->remove($item);
+        }
+        return $out;
+    }
+
+    public function with({{ holds }} $value): {{ name }}
+    {
+        $existingIndex = $this->indexOf($value);
+        if ($existingIndex === null) {
+            return $this->add($value);
+        }
+        $clone = clone $this;
+        $clone->set[$existingIndex] = $value;
+        return $clone;
+    }
+
+    public function reduce(callable $reduce, $accumulator)
+    {
+        return array_reduce($this->set, $reduce, $accumulator);
+    }
+
+    public function reduceToStatic(callable $reduce): {{ name }}
+    {
+        return new static(array_reduce($this->set, $reduce, {{ name }}::null()));
     }
 }

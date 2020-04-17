@@ -30,14 +30,26 @@ final class DefaultConfigBuilder implements ConfigBuilder
         $default = [
             'namespace' => 'ValueObjects',
             'templateDirs' => [
-                $this->packageRootPath . '/templates'
+                $this->packageRootPath . '/templates',
             ],
             'definitionFileRoot' => $this->rootPath,
         ];
         return array_merge_recursive(
             $default,
-            $this->configLoader->load(),
+            $this->fullyQualifiedPaths($this->configLoader->load()),
             $this->injectedConfig
         );
+    }
+
+    private function fullyQualifiedPaths(array $config): array
+    {
+        $config['templateDirs'] = array_map(function (string $path) {
+            if (strpos($path, '/') === 0) {
+                return $path;
+            }
+            return $this->rootPath . '/' . $path;
+        }, $config['templateDirs'] ?? []);
+
+        return $config;
     }
 }

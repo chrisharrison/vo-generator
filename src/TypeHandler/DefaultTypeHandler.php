@@ -5,40 +5,43 @@ declare(strict_types=1);
 namespace ChrisHarrison\VoGenerator\TypeHandler;
 
 use ChrisHarrison\VoGenerator\Definition\Definition;
-use ChrisHarrison\VoGenerator\Exceptions\TypeDoesNotExist;
 use ChrisHarrison\VoGenerator\Type\Type;
+use Psr\Container\ContainerInterface;
 
 final class DefaultTypeHandler implements TypeHandler
 {
+    private $container;
+
     /** @var Type[] */
     private $types;
 
+    private $builtTypes;
+
     public function __construct(
+        ContainerInterface $container,
         array $types
     ) {
+        $this->container = $container;
         $this->types = $types;
     }
 
-    public function handle(Definition $definition): array
+    public function handle(Definition $definition): Definition
     {
-        $default = [
-            'name' => $definition->name()->toString(),
-        ];
-        foreach ($this->types as $type) {
-            if ($type->name() === $definition->type()->name()) {
-                return array_merge($default, $type->handle($definition));
+        foreach ($this->builtTypes() as $type) {
+            if ($type->willHandle($definition)) {
+                return $type->handle($definition);
             }
         }
-        throw new TypeDoesNotExist($definition->type()->name());
+        return $definition;
     }
 
-    public function get(string $name): ?Type
+    private function builtTypes(): array
     {
-        foreach ($this->types as $type) {
-            if ($type->name() === $name) {
-                return $type;
-            }
+        if ($this->builtTypes) {
+            return $this->builtTypes;
         }
-        return null;
+        return $this->builtTypes = array_map(function (string $typeHandlerName) {
+            return $this->container->get($typeHandlerName);
+        }, $this->types);
     }
 }

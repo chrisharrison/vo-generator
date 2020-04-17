@@ -5,19 +5,13 @@ declare(strict_types=1);
 namespace ChrisHarrison\VoGenerator\DefinitionLoader\YamlDefinitionLoader;
 
 use ChrisHarrison\VoGenerator\Definition\Definition;
-use ChrisHarrison\VoGenerator\Definition\DefinitionName;
 use ChrisHarrison\VoGenerator\Definition\Definitions;
 use ChrisHarrison\VoGenerator\DefinitionLoader\DefinitionLoader;
-use ChrisHarrison\VoGenerator\Exceptions\TypeDoesNotExist;
 use ChrisHarrison\VoGenerator\TypeHandler\TypeHandler;
-use PHP_CodeSniffer\Tokenizers\PHP;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 use Symfony\Component\Yaml\Yaml;
-
-use function array_diff_key;
-use function array_map;
 
 final class YamlDefinitionLoader implements DefinitionLoader
 {
@@ -51,17 +45,7 @@ final class YamlDefinitionLoader implements DefinitionLoader
         $input = Yaml::parseFile($path);
 
         return new Definitions(array_map(function (array $raw) {
-            $name = new DefinitionName($raw['name']);
-            $type = $this->typeHandler->get($raw['type']);
-            if ($type === null) {
-                throw new TypeDoesNotExist($raw['type']);
-            }
-            $additionalProperties = array_diff_key($raw, ['name' => null, 'type' => 'null']);
-            return new Definition(
-                $name,
-                $type,
-                $additionalProperties
-            );
+            return new Definition($raw);
         }, $input));
     }
 }

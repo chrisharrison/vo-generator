@@ -5,36 +5,19 @@ declare(strict_types=1);
 namespace ChrisHarrison\VoGenerator\Type;
 
 use ChrisHarrison\VoGenerator\Definition\Definition;
+use ReflectionClass;
 
 abstract class SimpleType implements Type
 {
-    private $template;
+    abstract public function handle(Definition $definition): Definition;
 
-    abstract public function name(): string;
-
-    abstract public function enrichProperties(Definition $definition): array;
-
-    public function handle(Definition $definition): array
+    public function willHandle(Definition $definition): bool
     {
-        return array_merge(
-            $definition->additionalProperties(),
-            $this->enrichProperties($definition)
-        );
+        return $definition->type() === $this->name();
     }
 
-    public function template(): string
+    private function name(): string
     {
-        return $this->template !== null ? $this->template : strtolower($this->name());
-    }
-
-    /**
-     * @param string $template
-     * @return static
-     */
-    public function withTemplate(string $template)
-    {
-        $type = clone $this;
-        $type->template = $template;
-        return $type;
+        return strtolower(str_replace('Type', '', (new ReflectionClass($this))->getShortName()));
     }
 }

@@ -1,52 +1,107 @@
+use InvalidArgumentException;
 use ChrisHarrison\VoGenerator\ValueObject;
-use ReflectionMethod;
-use ReflectionParameter;
+use ChrisHarrison\VoGenerator\Entity;
 
-class {{ name }} implements ValueObject
+class {{ name }} implements {{ implements|join(', ') }}
 {
-    {% for property in properties %}
-    private ${{ property.propertyName }};
-    {% endfor %}
+{% for trait in traits %}
+    use \{{ trait }};
+{%  endfor %}
 
-    protected function __construct(
-        {% for property in properties %}
-        {{ property.name }} ${{ property.propertyName }}{% if loop.last != true %},{% endif %}
-        {% endfor %}
-    ) {
-        {% for property in properties %}
-        $this->{{ property.propertyName }} = ${{ property.propertyName }};
-        {% endfor %}
-    }
+    private $payload;
 
     {% for property in properties %}
     public function {{ property.propertyName }}(): {{ property.name }}
     {
-        return $this->{{ property.propertyName }};
+        try {
+        return {{ property.name }}::fromNative($this->payload['{{ property.propertyName }}'] ?? null);
+        } catch (\Throwable $e) {
+        var_dump($this); exit;
+        }
     }
     {% endfor %}
 
     {% for property in properties %}
     /**
+    * @param {{ property.name }} ${{ property.propertyName }}
     * @return static
     */
-    public function with{{ property.propertyName|capitalize }}({{ property.name }} ${{ property.propertyName }})
+    public function with{{ property.propertyName|ucfirst }}({{ property.name }} ${{ property.propertyName }})
     {
         $clone = clone $this;
-        $clone->{{ property.propertyName }} = ${{ property.propertyName }};
+        $clone->payload['{{ property.propertyName }}'] = ${{ property.propertyName }}->toNative();
         return $clone;
     }
     {% endfor %}
+
+    protected function __construct(array $payload)
+    {
+        $this->payload = array_map(function ($value) {
+            if ($value instanceof ValueObject) {
+                return $value->toNative();
+            }
+            return $value;
+        }, $payload);
+
+        $this->checkValidProperties();
+        $this->checkRequiredProperties();
+    }
+
+    private function checkValidProperties(): void
+    {
+        foreach (static::properties() as $key => $type) {
+            $type::fromNative($this->payload[$key] ?? null);
+        }
+    }
+
+    private function checkRequiredProperties(): void
+    {
+        if ($this->isNull()) {
+            return;
+        }
+
+        $missingRequiredProperties = [];
+        foreach (static::requiredProperties() as $property) {
+            if (($this->payload[$property] ?? null) === null) {
+                $missingRequiredProperties[] = $property;
+            }
+        }
+
+        if (count($missingRequiredProperties) > 0) {
+            throw new InvalidArgumentException(sprintf(
+                '{{ name }} cannot be initialised without: %s',
+                implode(', ', $missingRequiredProperties)
+            ));
+        }
+    }
+
+    private static function requiredProperties(): array
+    {
+        return [
+{% for property in properties %}
+    {% if (property.required) %}
+        '{{ property.propertyName }}',
+    {% endif %}
+{% endfor %}
+        ];
+    }
+
+    public static function properties(): array
+    {
+        return [
+{% for property in properties %}
+             '{{ property.propertyName }}' => {{ property.name }}::class,
+{% endfor %}
+        ];
+    }
 
     /**
      * @return bool
      */
     public function isNull(): bool
     {
-        $subValues = $this->propertiesToArray();
-
-        foreach ($subValues as $value) {
-            /* @var ValueObject $value */
-            if (!$value->isNull()) {
+        foreach ($this->payload as $value) {
+            if ($value !== null) {
                 return false;
             }
         }
@@ -67,9 +122,7 @@ class {{ name }} implements ValueObject
      */
     public function toNative()
     {
-        return array_map(function (ValueObject $valueObject) {
-            return $valueObject->toNative();
-        }, static::properties());
+        return $this->payload;
     }
 
     /**
@@ -78,28 +131,12 @@ class {{ name }} implements ValueObject
      */
     public static function fromNative($native)
     {
-        $args = [];
-        foreach (static::properties() as $type => $name) {
-            $args[] = $type::fromNative($native[$name]);
-        }
-        return new static(...$args);
-    }
-
-    /**
-     * @return array
-     */
-    private static function properties(): array
-    {
-        $params = (new ReflectionMethod(static::class, '__construct'))->getParameters();
-        return array_reduce($params, function (array $acc, ReflectionParameter $param) {
-            $acc[$param->getClass()->getName()] = $param->getName();
-            return $acc;
-        }, []);
+        return new static($native);
     }
 
     public static function null()
     {
-        return static::fromNative([]);
+        return new static([]);
     }
 
     /**
@@ -112,5 +149,21 @@ class {{ name }} implements ValueObject
             return static::fromNative($native);
         }
         return clone $this;
+    }
+
+    public function isSame(ValueObject $compare): bool
+    {
+        if (is_a($this, Entity::class)) {
+            if (!is_a($compare, Entity::class)) {
+                return false;
+            }
+            return $this->id()->isSame($compare->id());
+        }
+        return $this->toNative() == $compare->toNative();
+    }
+
+    public function isNotSame(ValueObject $compare): bool
+    {
+        return !$this->isSame($compare);
     }
 }

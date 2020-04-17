@@ -6,8 +6,6 @@ namespace ChrisHarrison\VoGenerator\Definition;
 
 use Assert\Assert;
 
-use function sprintf;
-
 final class DefinitionName
 {
     private $value;

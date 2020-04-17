@@ -7,18 +7,25 @@ use function strtoupper;
 
 class {{ name }} implements ValueObject
 {
+{% for trait in traits %}
+    use \{{ trait }};
+{%  endfor %}
+
     private $value;
+
+    private static function possibleValues(): array
+    {
+        return [
+{% for value in values %}
+    '{{ value }}',
+{% endfor %}
+        ];
+    }
 
     protected function __construct(?string $value)
     {
         $this->value = $value ? strtoupper($value) : null;
-        if (
-            !in_array($this->value, [
-            {% for value in values %}
-            '{{ value }}',
-            {% endfor %}
-            ])
-        ) {
+        if ($this->value !== null && !in_array($this->value, static::possibleValues())) {
             throw new InvalidArgumentException(
                 sprintf('%s is not a valid enum value for: %s', $this->value, get_called_class())
             );
@@ -76,6 +83,29 @@ class {{ name }} implements ValueObject
             return static::fromNative($native);
         }
         return clone $this;
+    }
+
+    public function isSame(ValueObject $compare): bool
+    {
+        return $this->toNative() == $compare->toNative();
+    }
+
+    public function isNotSame(ValueObject $compare): bool
+    {
+        return !$this->isSame($compare);
+    }
+
+    public function toNumeric(): ?int
+    {
+        if ($this->isNull()) {
+            return null;
+        }
+        return array_search($this->value, static::possibleValues());
+    }
+
+    public static function fromNumeric(int $numeric): {{ name }}
+    {
+        return new static(static::possibleValues()[$numeric]);
     }
 
     {% for value in values %}

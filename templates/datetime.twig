@@ -1,0 +1,173 @@
+use ChrisHarrison\VoGenerator\ValueObject;
+use DateTimeImmutable;
+use InvalidArgumentException;
+
+class {{ name }} implements ValueObject
+{
+{% for trait in traits %}
+    use \{{ trait }};
+{%  endfor %}
+
+    /**
+     * @var ?DateTimeImmutable
+     */
+    protected $value;
+
+    protected function __construct(?DateTimeImmutable $value)
+    {
+        $this->value = $value;
+    }
+
+    /**
+     * @return static
+     */
+    public static function null()
+    {
+        return static::fromNative(null);
+    }
+
+    /**
+     * @return static
+     */
+    public static function now()
+    {
+        return static::fromNative((new DateTimeImmutable())->format(DATE_RFC3339_EXTENDED));
+    }
+
+    /**
+     * @param ?string $native
+     * @return static
+     */
+    public static function fromNative($native)
+    {
+        if ($native !== null) {
+            if (is_string($native) === false) {
+                $type = gettype($native);
+                if ($type === 'object') {
+                    $type = get_class($native);
+                }
+                throw new InvalidArgumentException(sprintf(
+                    'Can only instantiate this object with a string. %s given.',
+                    $type
+                ));
+            }
+            $date = DateTimeImmutable::createFromFormat(DATE_RFC3339_EXTENDED, $native);
+            if (!$date) {
+                throw new InvalidArgumentException(sprintf(
+                    'Can only instantiate a {{ name }} with a valid RFC3339 string. %s given',
+                    $native
+                ));
+            }
+            return new static($date);
+        }
+        return new static(null);
+    }
+
+    /**
+     * @return string|null
+     */
+    public function toNative()
+    {
+        return $this->value ? $this->value->format(DATE_RFC3339_EXTENDED) : null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNull(): bool
+    {
+        return $this->value === null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNotNull(): bool
+    {
+        return !$this->isNull();
+    }
+
+    /**
+     * @param ?string $native
+     * @return static
+     */
+    public function whenNull($native)
+    {
+        if ($this->isNull()) {
+            return static::fromNative($native);
+        }
+        return clone $this;
+    }
+
+    /**
+     * @return DateTimeImmutable
+     */
+    public function toDateTime(): DateTimeImmutable
+    {
+        return $this->value;
+    }
+
+    /**
+     * @return int
+     */
+    public function toTimestamp(): int
+    {
+        return $this->value->getTimestamp();
+    }
+
+    /**
+     * @param string $format
+     * @return string|null
+     */
+    public function toFormat(string $format): ?string
+    {
+        if ($this->isNull()) {
+            return null;
+        }
+
+        return $this->value->format($format);
+    }
+
+    /**
+     * @param ValueObject $otherDate
+     * @return bool
+     */
+    public function isBefore(ValueObject $otherDate): bool
+    {
+        if ($this->isNull() || $otherDate->isNull()) {
+            return false;
+        }
+        if (!method_exists($otherDate, 'toDateTime')) {
+            return false;
+        }
+        return $this->value < $otherDate->toDateTime();
+    }
+
+    /**
+     * @param ValueObject $otherDate
+     * @return bool
+     */
+    public function isAfter(ValueObject $otherDate): bool
+    {
+        if ($this->isNull() || $otherDate->isNull()) {
+            return false;
+        }
+        if (!method_exists($otherDate, 'toDateTime')) {
+            return false;
+        }
+        return $this->value > $otherDate->toDateTime();
+    }
+
+    public function isSame(ValueObject $compare): bool
+    {
+        if (!method_exists($compare, 'toDateTime')) {
+            return false;
+        }
+        return $this->value == $compare->toDateTime();
+    }
+
+    public function isNotSame(ValueObject $compare): bool
+    {
+        return !$this->isSame($compare);
+    }
+}
