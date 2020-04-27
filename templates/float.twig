@@ -1,16 +1,20 @@
 use ChrisHarrison\VoGenerator\ValueObject;
+use ChrisHarrison\VoGenerator\HookComposition;
 
 class FloatValue implements ValueObject
 {
 {% for trait in traits %}
     use \{{ trait }};
 {%  endfor %}
+    use HookComposition;
 
     private $value;
 
     protected function __construct(?float $value)
     {
-        $this->value = $value;
+        $this->composeHookable(function (?float $value) {
+            $this->value = $value;
+        }, '__construct', $value);
     }
 
     /**
@@ -74,5 +78,35 @@ class FloatValue implements ValueObject
     public function isNotSame(ValueObject $compare): bool
     {
         return !$this->isSame($compare);
+    }
+
+    public function add(ValueObject $add): {{ name }}
+    {
+        return new static($this->value + $add->toNative());
+    }
+
+    public function subtract(ValueObject $subtract): {{ name }}
+    {
+        return new static($this->value - $subtract->toNative());
+    }
+
+    public function isMoreThan(ValueObject $compare): bool
+    {
+        return $this->toNative() > $compare->toNative();
+    }
+
+    public function isLessThan(ValueObject $compare): bool
+    {
+        return $this->toNative() < $compare->toNative();
+    }
+
+    public function isMoreThanOrEqual(ValueObject $compare): bool
+    {
+        return $this->toNative() >= $compare->toNative();
+    }
+
+    public function isLessThanOrEqual(ValueObject $compare): bool
+    {
+        return $this->toNative() <= $compare->toNative();
     }
 }

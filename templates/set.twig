@@ -1,26 +1,28 @@
 use InvalidArgumentException;
 use ChrisHarrison\VoGenerator\EntitySet;
 use ChrisHarrison\VoGenerator\ValueObject;
-
-use function array_map;
+use ChrisHarrison\VoGenerator\HookComposition;
 
 class {{ name }} implements {{ implements|join(', ') }}
 {
 {% for trait in traits %}
     use \{{ trait }};
 {%  endfor %}
+    use HookComposition;
 
     private $set;
 
     protected function __construct(array $set)
     {
-        $this->set = $set;
-        foreach ($this->set as $value) {
-            if (!$value instanceof {{ holds }}) {
-                throw new InvalidArgumentException('{{ name }} can only contain {{ holds }}');
+        $this->composeHookable(function (array $set) {
+            $this->set = array_values($set);
+            foreach ($this->set as $value) {
+                if (!$value instanceof {{ holds }}) {
+                    throw new InvalidArgumentException('{{ name }} can only contain {{ holds }}');
+                }
             }
-        }
-        $this->checkUniqueIds();
+            $this->checkUniqueIds();
+        }, '__construct', $set);
     }
 
     private function checkUniqueIds(): void
@@ -133,9 +135,9 @@ class {{ name }} implements {{ implements|join(', ') }}
     {% for property, type in innerProperties %}
     public function removeBy{{ property|ucfirst }}(\{{ type }} $removeValue): {{ name }}
     {
-        return new {{ name }}(array_values(array_filter($this->set, function ({{ holds }} $value) use ($removeValue) {
+        return new {{ name }}(array_filter($this->set, function ({{ holds }} $value) use ($removeValue) {
             return $value->{{ property }}()->isNotSame($removeValue);
-        })));
+        }));
     }
     {% endfor %}
 
@@ -191,7 +193,7 @@ class {{ name }} implements {{ implements|join(', ') }}
 
     public function has({{ holds }} $compare): bool
     {
-        return !!$this->indexOf($compare);
+        return $this->indexOf($compare) !== null;
     }
 
     public function hasAll({{ name }} $compare): bool
@@ -276,5 +278,18 @@ class {{ name }} implements {{ implements|join(', ') }}
     public function reduceToStatic(callable $reduce): {{ name }}
     {
         return new static(array_reduce($this->set, $reduce, {{ name }}::null()));
+    }
+
+    public function random(): {{ holds }}
+    {
+        if ($this->isNull()) {
+            return {{ holds }}::null();
+        }
+        return $this->atIndex(random_int(0, $this->count() - 1));
+    }
+
+    public function slice(int $offset, ?int $length): {{ name }}
+    {
+        return new {{ name }}(array_slice($this->toArray(), $offset, $length));
     }
 }

@@ -1,15 +1,13 @@
 use ChrisHarrison\VoGenerator\ValueObject;
 use InvalidArgumentException;
-
-use function get_called_class;
-use function sprintf;
-use function strtoupper;
+use ChrisHarrison\VoGenerator\HookComposition;
 
 class {{ name }} implements ValueObject
 {
 {% for trait in traits %}
     use \{{ trait }};
 {%  endfor %}
+    use HookComposition;
 
     private $value;
 
@@ -24,12 +22,14 @@ class {{ name }} implements ValueObject
 
     protected function __construct(?string $value)
     {
-        $this->value = $value ? strtoupper($value) : null;
-        if ($this->value !== null && !in_array($this->value, static::possibleValues())) {
-            throw new InvalidArgumentException(
-                sprintf('%s is not a valid enum value for: %s', $this->value, get_called_class())
-            );
-        }
+        $this->composeHookable(function (?string $value) {
+            $this->value = $value ? strtoupper($value) : null;
+            if ($this->value !== null && !in_array($this->value, static::possibleValues())) {
+                throw new InvalidArgumentException(
+                    sprintf('%s is not a valid enum value for: %s', $this->value, get_called_class())
+                );
+            }
+        }, '__construct', $value);
     }
 
     /**

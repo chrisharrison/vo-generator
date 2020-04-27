@@ -1,16 +1,20 @@
 use ChrisHarrison\VoGenerator\ValueObject;
+use ChrisHarrison\VoGenerator\HookComposition;
 
 class {{ name }} implements ValueObject
 {
 {% for trait in traits %}
     use \{{ trait }};
 {%  endfor %}
+    use HookComposition;
 
     private $value;
 
     protected function __construct(?int $value)
     {
-        $this->value = $value;
+        $this->composeHookable(function (?int $value) {
+            $this->value = $value;
+        }, '__construct', $value);
     }
 
     /**
@@ -78,12 +82,12 @@ class {{ name }} implements ValueObject
 
     public function add(ValueObject $add): {{ name }}
     {
-        return new static($this->value + $add);
+        return new static($this->value + $add->toNative());
     }
 
     public function subtract(ValueObject $subtract): {{ name }}
     {
-        return new static($this->value - $subtract);
+        return new static($this->value - $subtract->toNative());
     }
 
     public function isMoreThan(ValueObject $compare): bool
@@ -93,6 +97,16 @@ class {{ name }} implements ValueObject
 
     public function isLessThan(ValueObject $compare): bool
     {
-        return $this->toNative() > $compare->toNative();
+        return $this->toNative() < $compare->toNative();
+    }
+
+    public function isMoreThanOrEqual(ValueObject $compare): bool
+    {
+        return $this->toNative() >= $compare->toNative();
+    }
+
+    public function isLessThanOrEqual(ValueObject $compare): bool
+    {
+        return $this->toNative() <= $compare->toNative();
     }
 }

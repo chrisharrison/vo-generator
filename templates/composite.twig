@@ -1,23 +1,21 @@
 use InvalidArgumentException;
 use ChrisHarrison\VoGenerator\ValueObject;
 use ChrisHarrison\VoGenerator\Entity;
+use ChrisHarrison\VoGenerator\HookComposition;
 
 class {{ name }} implements {{ implements|join(', ') }}
 {
 {% for trait in traits %}
     use \{{ trait }};
 {%  endfor %}
+    use HookComposition;
 
     private $payload;
 
     {% for property in properties %}
     public function {{ property.propertyName }}(): {{ property.name }}
     {
-        try {
         return {{ property.name }}::fromNative($this->payload['{{ property.propertyName }}'] ?? null);
-        } catch (\Throwable $e) {
-        var_dump($this); exit;
-        }
     }
     {% endfor %}
 
@@ -36,21 +34,23 @@ class {{ name }} implements {{ implements|join(', ') }}
 
     protected function __construct(array $payload)
     {
-        $this->payload = array_map(function ($value) {
-            if ($value instanceof ValueObject) {
-                return $value->toNative();
-            }
-            return $value;
-        }, $payload);
+        $this->composeHookable(function (array $payload) {
+            $this->payload = array_map(function ($value) {
+                if ($value instanceof ValueObject) {
+                    return $value->toNative();
+                }
+                return $value;
+            }, $payload);
 
-        $this->checkValidProperties();
-        $this->checkRequiredProperties();
+            $this->checkValidProperties();
+            $this->checkRequiredProperties();
+        }, '__construct', $payload);
     }
 
     private function checkValidProperties(): void
     {
         foreach (static::properties() as $key => $type) {
-            $type::fromNative($this->payload[$key] ?? null);
+            $type::fromNative($this->payload[$key] ?? $type::null()->toNative());
         }
     }
 
@@ -122,7 +122,11 @@ class {{ name }} implements {{ implements|join(', ') }}
      */
     public function toNative()
     {
-        return $this->payload;
+        return array_reduce(array_keys(static::properties()), function (array $acc, string $property) {
+            $propertyType = static::properties()[$property];
+            $acc[$property] = $propertyType::fromNative($this->payload[$property] ?? null)->toNative();
+            return $acc;
+        }, []);
     }
 
     /**

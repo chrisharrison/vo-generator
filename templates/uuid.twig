@@ -1,23 +1,27 @@
 use ChrisHarrison\VoGenerator\ValueObject;
 use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
+use ChrisHarrison\VoGenerator\HookComposition;
 
 class {{ name }} implements ValueObject
 {
 {% for trait in traits %}
     use \{{ trait }};
 {%  endfor %}
+    use HookComposition;
 
     private $value;
 
     protected function __construct(?string $value)
     {
-        $this->value = $value;
-        if ($this->value !== null && !Uuid::isValid($this->value)) {
-            throw new InvalidArgumentException(
-                sprintf('A {{ name }} can only be instantiated with a valid UUID. %s given', $this->value)
-            );
-        }
+        $this->composeHookable(function (?string $value) {
+            $this->value = $value;
+            if ($this->value !== null && !Uuid::isValid($this->value)) {
+                throw new InvalidArgumentException(
+                    sprintf('A {{ name }} can only be instantiated with a valid UUID. %s given', $this->value)
+                );
+            }
+        }, '__construct', $value);
     }
 
     /**
