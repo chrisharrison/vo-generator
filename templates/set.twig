@@ -133,6 +133,15 @@ class {{ name }} implements {{ implements|join(', ') }}
     {% endfor %}
 
     {% for property, type in innerProperties %}
+    public function getAllBy{{ property|ucfirst }}(\{{ type }} $value): {{ name }}
+    {
+        return $this->filter(function ({{ holds }} $item) use ($value) {
+            return $item->{{ property }}()->isSame($value);
+        });
+    }
+    {% endfor %}
+
+    {% for property, type in innerProperties %}
     public function removeBy{{ property|ucfirst }}(\{{ type }} $removeValue): {{ name }}
     {
         return new {{ name }}(array_filter($this->set, function ({{ holds }} $value) use ($removeValue) {
