@@ -1,0 +1,6 @@
+- name: TestName
+  type: testtype
+  arbitraryProperty: test
+
+- name: TestName2
+  type: anothertype

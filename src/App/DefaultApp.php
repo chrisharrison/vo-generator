@@ -6,20 +6,24 @@ namespace ChrisHarrison\VoGenerator\App;
 
 use ChrisHarrison\VoGenerator\CodeStreamer\CodeStreamer;
 use ChrisHarrison\VoGenerator\CodeStreamer\DefaultCodeStreamer;
-use ChrisHarrison\VoGenerator\ConfigBuilder\ConfigBuilder;
-use ChrisHarrison\VoGenerator\ConfigBuilder\DefaultConfigBuilder;
-use ChrisHarrison\VoGenerator\ConfigLoader\ConfigLoader;
-use ChrisHarrison\VoGenerator\ConfigLoader\YamlConfigLoader;
+use ChrisHarrison\VoGenerator\Config\Config;
+use ChrisHarrison\VoGenerator\Config\DefaultConfig;
+use ChrisHarrison\VoGenerator\ConfigParser\ConfigParser;
+use ChrisHarrison\VoGenerator\ConfigParser\DefaultConfigParser;
 use ChrisHarrison\VoGenerator\DefinitionLoader\DefinitionLoader;
 use ChrisHarrison\VoGenerator\DefinitionLoader\YamlDefinitionLoader\YamlDefinitionLoader;
 use ChrisHarrison\VoGenerator\ExtensionHandler\DefaultExtensionHandler;
 use ChrisHarrison\VoGenerator\ExtensionHandler\ExtensionHandler;
 use ChrisHarrison\VoGenerator\InternalEvaluator\DefaultInternalEvaluator;
 use ChrisHarrison\VoGenerator\InternalEvaluator\InternalEvaluator;
+use ChrisHarrison\VoGenerator\Pathfinder\DefaultPathfinder;
+use ChrisHarrison\VoGenerator\Pathfinder\Pathfinder;
 use ChrisHarrison\VoGenerator\Renderer\Renderer;
 use ChrisHarrison\VoGenerator\Renderer\TwigRenderer;
 use ChrisHarrison\VoGenerator\Registry\DefaultRegistry;
 use ChrisHarrison\VoGenerator\Registry\Registry;
+use ChrisHarrison\VoGenerator\TwigFilters\Filters\ImplementsFilter;
+use ChrisHarrison\VoGenerator\TwigFilters\Filters\UcfirstFilter;
 use ChrisHarrison\VoGenerator\Type\DefaultTypes\CompositeType;
 use ChrisHarrison\VoGenerator\Type\DefaultTypes\EntitySetType;
 use ChrisHarrison\VoGenerator\Type\DefaultTypes\EntityType;
@@ -33,11 +37,10 @@ use DI\ContainerBuilder;
 use Psr\Container\ContainerInterface;
 use Twig\Environment as TwigEnvironment;
 use Twig\Loader\FilesystemLoader;
-use Twig\TwigFilter;
 
 use function DI\autowire;
 
-final class DefaultApp
+final class DefaultApp implements App
 {
     private static $singleton;
 
@@ -46,46 +49,30 @@ final class DefaultApp
         if (static::$singleton) {
             return static::$singleton;
         }
-        return static::$singleton = static::make();
+        return static::$singleton = (new static())->make();
     }
 
-    public static function make(array $config = []): ContainerInterface
+    public function make(array $config = []): ContainerInterface
     {
         $builder = new ContainerBuilder();
         $builder->addDefinitions([
-            'rootPath' => function (Container $c) {
-                $path = __DIR__ . '/../..';
-                if (file_exists($path . '/../../../vendor/chrisharrison/vo-generator')) {
-                    return realpath($path . '/../../..');
-                }
-                return realpath($path);
-            },
-            'packageRootPath' => function (Container $c) {
-                $installedPath = $c->get('rootPath') . '/vendor/chrisharrison/vo-generator';
-                if (file_exists($installedPath)) {
-                    return $installedPath;
-                }
-                return $c->get('rootPath');
-            },
+            Pathfinder::class => autowire(DefaultPathfinder::class),
+            ConfigParser::class => autowire(DefaultConfigParser::class),
             'injectedConfig' => $config,
-            'config' => function (Container $c) {
-                return $c->get(ConfigBuilder::class)->build();
-            },
-            ConfigBuilder::class => function (Container $c) {
-                return new DefaultConfigBuilder(
-                    $c->get(ConfigLoader::class),
-                    $c->get('rootPath'),
-                    $c->get('packageRootPath'),
-                    $c->get('injectedConfig')
+            Config::class => function (Container $c) {
+                $loadedConfig = new DefaultConfig(
+                    \Noodlehaus\Config::load([
+                        '?' . $c->get(Pathfinder::class)->rootPath() . '/.vo-config.yml',
+                    ])->all()
                 );
-            },
-            ConfigLoader::class => function (Container $c) {
-                return new YamlConfigLoader($c->get('rootPath') . '/.vo-config.yml');
+                $injectedConfig = new Config($c->get('injectedConfig'));
+                return $c->get(ConfigParser::class)->parse($loadedConfig->merge($injectedConfig));
             },
             DefinitionLoader::class => function (Container $c) {
                 return new YamlDefinitionLoader(
                     $c->get(TypeHandler::class),
-                    $c->get('config')['definitionFileRoot']
+                    $c->get(Config::class)->get('definitionsRoot'),
+                    $c->get(Config::class)->get('fileExtension')
                 );
             },
             ExtensionHandler::class => function (Container $c) {
@@ -97,7 +84,7 @@ final class DefaultApp
                     $c->get(ExtensionHandler::class),
                     $c->get(TypeHandler::class),
                     $c->get(Renderer::class),
-                    $c->get('config')['namespace']
+                    $c->get(Config::class)->get('namespace')
                 );
             },
             Renderer::class => autowire(TwigRenderer::class),
@@ -105,7 +92,7 @@ final class DefaultApp
                 return new DefaultInternalEvaluator(
                     $c->get(CodeStreamer::class),
                     $c->get(Registry::class),
-                    $c->get('config')['namespace']
+                    $c->get(Config::class)->get('namespace')
                 );
             },
             SetType::class => function (Container $c) {
@@ -126,17 +113,16 @@ final class DefaultApp
             },
             TwigEnvironment::class => function (Container $c) {
                 $twig = new TwigEnvironment(
-                    new FilesystemLoader($c->get('config')['templateDirs']),
+                    new FilesystemLoader($c->get(Config::class)->get('templateDirs')),
                     []
                 );
-                $twig->addFilter(new TwigFilter('ucfirst', function (string $value) {
-                    return ucfirst($value);
-                }));
+                $twig->addFilter((new UcfirstFilter())->make());
+                $twig->addFilter((new ImplementsFilter())->make());
                 return $twig;
             },
             CodeStreamer::class => function (Container $c) {
                 return new DefaultCodeStreamer(
-                    $c->get('config')['namespace']
+                    $c->get(Config::class)->get('namespace')
                 );
             },
         ]);

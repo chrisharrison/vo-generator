@@ -28,7 +28,7 @@ final class EntitySetType extends SimpleType implements Type
     {
         return $definition->withMergedPayload([
             'template' => 'set',
-            'implements' => ['\\' . ValueObject::class, '\\' . Countable::class, '\\' . EntitySet::class],
+            'implements' => [ValueObject::class, Countable::class, EntitySet::class],
             'holds' => $definition->payload()['holds'],
             'innerProperties' => $this->innerProperties($definition->payload()['holds']),
         ]);

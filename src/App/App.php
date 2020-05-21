@@ -8,5 +8,6 @@ use Psr\Container\ContainerInterface;
 
 interface App
 {
+    public static function singleton(): ContainerInterface;
     public function make(): ContainerInterface;
 }

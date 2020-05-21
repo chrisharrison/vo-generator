@@ -16,7 +16,7 @@ final class CompositeType extends SimpleType implements Type
     {
         return $definition->withMergedPayload([
             'template' => $definition->type(),
-            'implements' => ['\\' . ValueObject::class, '\\' . HasInternalProperties::class],
+            'implements' => [ValueObject::class, HasInternalProperties::class],
             'properties' => array_map(function (array $property) {
                 return [
                     'name' => $property['name'],

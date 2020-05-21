@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace ChrisHarrison\VoGenerator\Registry;
 
-use ChrisHarrison\VoGenerator\Definition\Definition;
 use ChrisHarrison\VoGenerator\Definition\DefinitionName;
 use ChrisHarrison\VoGenerator\Definition\Definitions;
 use ChrisHarrison\VoGenerator\ExtensionHandler\ExtensionHandler;
@@ -60,11 +59,6 @@ final class DefaultRegistry implements Registry
         );
     }
 
-    public function getDefinition(DefinitionName $name): Definition
-    {
-        return $this->definitions->get($name);
-    }
-
     public function current()
     {
         return $this->resolve(
@@ -90,5 +84,18 @@ final class DefaultRegistry implements Registry
     public function rewind()
     {
         $this->position = 0;
+    }
+
+    /**
+     * @param callable $filterMethod
+     * @return static
+     */
+    public function filter(callable $filterMethod)
+    {
+        $clone = clone $this;
+        $clone->definitions = new Definitions(
+            array_filter($clone->definitions->toArray(), $filterMethod)
+        );
+        return $clone;
     }
 }

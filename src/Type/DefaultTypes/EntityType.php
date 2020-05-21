@@ -16,7 +16,7 @@ final class EntityType extends SimpleType implements Type
     {
         return $definition->withMergedPayload([
             'template' => 'composite',
-            'implements' => ['\\' . ValueObject::class, '\\' . Entity::class],
+            'implements' => [ValueObject::class, Entity::class],
             'properties' => array_map(function (array $property) {
                 return [
                     'name' => $property['name'],

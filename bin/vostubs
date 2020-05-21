@@ -5,12 +5,18 @@ use ChrisHarrison\VoGenerator\App\DefaultApp;
 use ChrisHarrison\VoGenerator\CodeStreamer\CodeStreamer;
 use ChrisHarrison\VoGenerator\CodeStreamOut\MultiFile;
 use ChrisHarrison\VoGenerator\Registry\Registry;
+use ChrisHarrison\VoGenerator\Pathfinder\Pathfinder;
 
-require_once(__DIR__ . '/../../../vendor/autoload.php');
+foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php'] as $file) {
+    if (file_exists($file)) {
+        require $file;
+        break;
+    }
+}
 
 $app = DefaultApp::singleton();
 
 $app->get(CodeStreamer::class)->stream(
     $app->get(Registry::class),
-    new MultiFile($app->get('rootPath') . '/.vo.code')
+    new MultiFile($app->get(Pathfinder::class)->rootPath() . '/.vo.code')
 );

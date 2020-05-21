@@ -17,13 +17,16 @@ final class YamlDefinitionLoader implements DefinitionLoader
 {
     private $typeHandler;
     private $rootPath;
+    private $fileExtension;
 
     public function __construct(
         TypeHandler $typeHandler,
-        string $rootPath
+        string $rootPath,
+        string $fileExtension
     ) {
         $this->typeHandler = $typeHandler;
         $this->rootPath = $rootPath;
+        $this->fileExtension = $fileExtension;
     }
 
     public function load(): Definitions
@@ -32,7 +35,7 @@ final class YamlDefinitionLoader implements DefinitionLoader
         $fileIterator = new RecursiveDirectoryIterator($this->rootPath);
         foreach (new RecursiveIteratorIterator($fileIterator) as $filename) {
             /** @var SplFileInfo $filename */
-            if (strpos(strrev($filename->getFilename()), strrev('.vo.yml')) !== 0) {
+            if (strpos(strrev($filename->getFilename()), strrev('.' . $this->fileExtension)) !== 0) {
                 continue;
             }
             $definitions = $definitions->add($this->loadFile((string) $filename));

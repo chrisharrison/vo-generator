@@ -12,7 +12,7 @@ final class DefaultTypeHandler implements TypeHandler
 {
     private $container;
 
-    /** @var Type[] */
+    /** @var string[] */
     private $types;
 
     private $builtTypes;
@@ -35,6 +35,9 @@ final class DefaultTypeHandler implements TypeHandler
         return $definition;
     }
 
+    /**
+     * @return Type[]
+     */
     private function builtTypes(): array
     {
         if ($this->builtTypes) {

@@ -1,9 +1,9 @@
 use InvalidArgumentException;
-use ChrisHarrison\VoGenerator\ValueObject;
 use ChrisHarrison\VoGenerator\Entity;
+use ChrisHarrison\VoGenerator\ValueObject;
 use ChrisHarrison\VoGenerator\HookComposition;
 
-class {{ name }} implements {{ implements|join(', ') }}
+class {{ name }} implements {{ implements|implements }}
 {
 {% for trait in traits %}
     use \{{ trait }};
@@ -50,7 +50,9 @@ class {{ name }} implements {{ implements|join(', ') }}
     private function checkValidProperties(): void
     {
         foreach (static::properties() as $key => $type) {
-            $type::fromNative($this->payload[$key] ?? $type::null()->toNative());
+            if (class_exists($type)) {
+                $type::fromNative($this->payload[$key] ?? $type::null()->toNative());
+            }
         }
     }
 

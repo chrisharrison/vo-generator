@@ -27,7 +27,7 @@ final class SetType extends SimpleType implements Type
     {
         return $definition->withMergedPayload([
             'template' => $definition->type(),
-            'implements' => ['\\' . ValueObject::class, '\\' . Countable::class],
+            'implements' => [ValueObject::class, Countable::class],
             'holds' => $definition->payload()['holds'],
             'innerProperties' => $this->innerProperties($definition->payload()['holds']),
         ]);

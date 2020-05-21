@@ -3,7 +3,7 @@ use ChrisHarrison\VoGenerator\EntitySet;
 use ChrisHarrison\VoGenerator\ValueObject;
 use ChrisHarrison\VoGenerator\HookComposition;
 
-class {{ name }} implements {{ implements|join(', ') }}
+class {{ name }} implements {{ implements|implements }}
 {
 {% for trait in traits %}
     use \{{ trait }};

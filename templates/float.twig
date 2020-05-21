@@ -1,7 +1,7 @@
 use ChrisHarrison\VoGenerator\ValueObject;
 use ChrisHarrison\VoGenerator\HookComposition;
 
-class FloatValue implements ValueObject
+class {{ name}} implements ValueObject
 {
 {% for trait in traits %}
     use \{{ trait }};
