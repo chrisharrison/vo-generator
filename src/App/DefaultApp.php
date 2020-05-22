@@ -11,6 +11,11 @@ use ChrisHarrison\VoGenerator\Config\DefaultConfig;
 use ChrisHarrison\VoGenerator\ConfigParser\ConfigParser;
 use ChrisHarrison\VoGenerator\ConfigParser\DefaultConfigParser;
 use ChrisHarrison\VoGenerator\DefinitionLoader\DefinitionLoader;
+use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\Lexer\Lexer;
+use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\Parser\DefaultVomlParser;
+use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\Parser\Parser;
+use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\Parser\VomlParser;
+use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\VomlDefinitionLoader;
 use ChrisHarrison\VoGenerator\DefinitionLoader\YamlDefinitionLoader\YamlDefinitionLoader;
 use ChrisHarrison\VoGenerator\ExtensionHandler\DefaultExtensionHandler;
 use ChrisHarrison\VoGenerator\ExtensionHandler\ExtensionHandler;
@@ -68,9 +73,12 @@ final class DefaultApp implements App
                 $injectedConfig = new Config($c->get('injectedConfig'));
                 return $c->get(ConfigParser::class)->parse($loadedConfig->merge($injectedConfig));
             },
+            VomlParser::class => function (Container $c) {
+                return new DefaultVomlParser(new Parser(new Lexer()));
+            },
             DefinitionLoader::class => function (Container $c) {
-                return new YamlDefinitionLoader(
-                    $c->get(TypeHandler::class),
+                return new VomlDefinitionLoader(
+                    $c->get(VomlParser::class),
                     $c->get(Config::class)->get('definitionsRoot'),
                     $c->get(Config::class)->get('fileExtension')
                 );

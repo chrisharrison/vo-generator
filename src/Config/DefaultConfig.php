@@ -14,7 +14,7 @@ final class DefaultConfig extends AbstractConfig
             'namespace' => 'ValueObjects',
             'templateDirs' => ['{packagePath}/templates'],
             'definitionsRoot' => '{rootPath}',
-            'fileExtension' => 'vo.yml',
+            'fileExtension' => 'voml',
         ];
     }
 }

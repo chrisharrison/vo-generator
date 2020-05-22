@@ -7,6 +7,7 @@ namespace ChrisHarrison\VoGenerator\IntegrationTests;
 use ChrisHarrison\VoGenerator\App\DefaultApp;
 use ChrisHarrison\VoGenerator\Definition\DefinitionName;
 use ChrisHarrison\VoGenerator\InternalEvaluator\InternalEvaluator;
+use ChrisHarrison\VoGenerator\Registry\Registry;
 use PHPUnit\Framework\TestCase;
 use ValueObjects\BooleanTest;
 use ValueObjects\CompositeTest;
@@ -26,7 +27,7 @@ final class GenerationIntegrationTest extends TestCase
     {
         $app = (new DefaultApp())->make([
             'definitionsRoot' => __DIR__,
-            'fileExtension' => 'yml',
+            'fileExtension' => 'voml-test',
         ]);
         $internalEvaluator = $app->get(InternalEvaluator::class);
         $internalEvaluator->evaluate(new DefinitionName($name));

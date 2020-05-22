@@ -32,6 +32,7 @@ final class Definition
     {
         return $this->payload['template'];
     }
+
     public function traits(): array
     {
         return $this->payload['traits'] ?? [];

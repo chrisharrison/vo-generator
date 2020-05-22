@@ -15,7 +15,7 @@ final class DefaultConfigTest extends TestCase
             'namespace' => 'ValueObjects',
             'templateDirs' => ['{packagePath}/templates'],
             'definitionsRoot' => '{rootPath}',
-            'fileExtension' => 'vo.yml',
+            'fileExtension' => 'voml',
         ], $config->all());
     }
 }

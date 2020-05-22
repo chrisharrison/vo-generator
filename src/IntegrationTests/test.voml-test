@@ -1,0 +1,28 @@
+boolean BooleanTest
+
+composite CompositeTest {
+    bool: BooleanTest
+}
+
+datetime DateTimeTest
+
+enum EnumTest {
+    ONE
+    TWO
+}
+
+float FloatTest
+
+integer IntegerTest
+
+set SetTest[CompositeTest]
+
+string StringTest
+
+uuid UuidTest
+
+entityset EntitySetTest[EntityTest]
+
+entity EntityTest {
+    id: UuidTest
+}

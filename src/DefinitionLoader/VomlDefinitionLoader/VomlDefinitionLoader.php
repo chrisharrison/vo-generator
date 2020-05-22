@@ -2,25 +2,27 @@
 
 declare(strict_types=1);
 
-namespace ChrisHarrison\VoGenerator\DefinitionLoader\YamlDefinitionLoader;
+namespace ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader;
 
-use ChrisHarrison\VoGenerator\Definition\Definition;
 use ChrisHarrison\VoGenerator\Definition\Definitions;
 use ChrisHarrison\VoGenerator\DefinitionLoader\DefinitionLoader;
+use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\Parser\VomlParser;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
-use Symfony\Component\Yaml\Yaml;
 
-final class YamlDefinitionLoader implements DefinitionLoader
+final class VomlDefinitionLoader implements DefinitionLoader
 {
+    private $parser;
     private $rootPath;
     private $fileExtension;
 
     public function __construct(
+        VomlParser $parser,
         string $rootPath,
         string $fileExtension
     ) {
+        $this->parser = $parser;
         $this->rootPath = $rootPath;
         $this->fileExtension = $fileExtension;
     }
@@ -41,10 +43,6 @@ final class YamlDefinitionLoader implements DefinitionLoader
 
     private function loadFile(string $path): Definitions
     {
-        $input = Yaml::parseFile($path);
-
-        return new Definitions(array_map(function (array $raw) {
-            return new Definition($raw);
-        }, $input));
+        return $this->parser->parse(file_get_contents($path));
     }
 }

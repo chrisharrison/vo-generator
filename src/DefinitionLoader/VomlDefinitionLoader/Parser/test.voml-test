@@ -1,0 +1,25 @@
+integer Integer
+
+composite Composite {
+
+    enumValue: Enum
+    integerValue: Integer
+}
+
+enum Enum {
+    ONE
+    TWO
+}
+
+
+set Set[Composite]
+
+string      String
+
+ uuid Uuid
+
+message MyEvent (messageType: event)    {
+    userId: Uuid!
+    notRequired: String
+    arbitraryOptions: Integer(arbitrary: value arbitrary2: value2)
+}
