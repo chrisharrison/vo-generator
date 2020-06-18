@@ -65,13 +65,20 @@ final class DefaultApp implements App
             ConfigParser::class => autowire(DefaultConfigParser::class),
             'injectedConfig' => $config,
             Config::class => function (Container $c) {
-                $loadedConfig = new DefaultConfig(
+
+                $defaultConfig = (new DefaultConfig([]))->all();
+                $loadedConfig = (new Config(
                     \Noodlehaus\Config::load([
                         '?' . $c->get(Pathfinder::class)->rootPath() . '/.vo-config.yml',
                     ])->all()
-                );
-                $injectedConfig = new Config($c->get('injectedConfig'));
-                return $c->get(ConfigParser::class)->parse($loadedConfig->merge($injectedConfig));
+                ))->all();
+                $injectedConfig = $c->get('injectedConfig');
+
+                return $c->get(ConfigParser::class)->parse(new Config(array_merge_recursive(
+                    $defaultConfig,
+                    $loadedConfig,
+                    $injectedConfig
+                )));
             },
             VomlParser::class => function (Container $c) {
                 return new DefaultVomlParser(new Parser(new Lexer()));
