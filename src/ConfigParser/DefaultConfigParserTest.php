@@ -21,7 +21,7 @@ final class DefaultConfigParserTest extends TestCase
         $pathfinder->rootPath()->willReturn('ROOT_PATH');
         $pathfinder->packagePath()->willReturn('PACKAGE_PATH');
 
-        $parser = new DefaultConfigParser($pathfinder->reveal());
+        $parser = new DefaultConfigParser($pathfinder->reveal(), []);
 
         $parsedConfig = $parser->parse($config);
 
@@ -29,5 +29,26 @@ final class DefaultConfigParserTest extends TestCase
             'test1' => ['PACKAGE_PATH/test'],
             'test2' => 'ROOT_PATH/test',
         ], $parsedConfig->all());
+    }
+    
+    public function test_type_system_is_conformed_to()
+    {
+        $pathfinder = $this->prophesize(Pathfinder::class);
+
+        $parser = new DefaultConfigParser(
+            $pathfinder->reveal(),
+            [
+                'abc' => 'string',
+                'def' => 'array',
+            ]
+        );
+
+        $this->assertEquals([
+            'abc' => 'two',
+            'def' => ['three']
+        ], $parser->parse(new Config([
+            'abc' => ['one', 'two'],
+            'def' => 'three'
+        ])));
     }
 }

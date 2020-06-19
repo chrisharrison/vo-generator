@@ -11,16 +11,21 @@ use Noodlehaus\ConfigInterface;
 final class DefaultConfigParser implements ConfigParser
 {
     private $pathfinder;
+    private $types;
 
     public function __construct(
-        Pathfinder $pathfinder
+        Pathfinder $pathfinder,
+        array $types
     ) {
         $this->pathfinder = $pathfinder;
+        $this->types = $types;
     }
 
     public function parse(ConfigInterface $config): ConfigInterface
     {
-        return new Config($this->parseValue($config->all()));
+        $configItems = $config->all();
+        $configItems = $this->conformTypes($configItems);
+        return new Config($this->parseValue($configItems));
     }
 
     /**
@@ -42,5 +47,28 @@ final class DefaultConfigParser implements ConfigParser
             $this->pathfinder->rootPath(),
             $this->pathfinder->packagePath(),
         ], $value);
+    }
+
+    private function conformTypes(array $config): array
+    {
+        foreach ($config as $key => $value) {
+            $formatter = function ($type, $value) {
+                if ($type === 'string') {
+                    if (is_array($value)) {
+                        return (string) $value[array_key_last($value)];
+                    }
+                    return (string) $value;
+                }
+                if ($type === 'array') {
+                    if (is_array($value)) {
+                        return $value;
+                    }
+                    return [$value];
+                }
+                return $value;
+            };
+            $config[$key] = $formatter($this->types[$key] ?? null, $value);
+        }
+        return $config;
     }
 }

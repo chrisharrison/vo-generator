@@ -62,10 +62,19 @@ final class DefaultApp implements App
         $builder = new ContainerBuilder();
         $builder->addDefinitions([
             Pathfinder::class => autowire(DefaultPathfinder::class),
-            ConfigParser::class => autowire(DefaultConfigParser::class),
+            ConfigParser::class => function (Container $c) {
+                return new DefaultConfigParser(
+                    $c->get(Pathfinder::class),
+                    [
+                        'namespace' => 'string',
+                        'templateDirs' => 'array',
+                        'definitionsRoot' => 'string',
+                        'fileExtension' => 'string',
+                    ]
+                );
+            },
             'injectedConfig' => $config,
             Config::class => function (Container $c) {
-
                 $defaultConfig = (new DefaultConfig([]))->all();
                 $loadedConfig = (new Config(
                     \Noodlehaus\Config::load([
