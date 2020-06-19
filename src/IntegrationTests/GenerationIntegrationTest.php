@@ -7,7 +7,6 @@ namespace ChrisHarrison\VoGenerator\IntegrationTests;
 use ChrisHarrison\VoGenerator\App\DefaultApp;
 use ChrisHarrison\VoGenerator\Definition\DefinitionName;
 use ChrisHarrison\VoGenerator\InternalEvaluator\InternalEvaluator;
-use ChrisHarrison\VoGenerator\Registry\Registry;
 use PHPUnit\Framework\TestCase;
 use ValueObjects\BooleanTest;
 use ValueObjects\CompositeTest;

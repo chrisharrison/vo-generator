@@ -16,7 +16,6 @@ use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\Parser\Defau
 use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\Parser\Parser;
 use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\Parser\VomlParser;
 use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\VomlDefinitionLoader;
-use ChrisHarrison\VoGenerator\DefinitionLoader\YamlDefinitionLoader\YamlDefinitionLoader;
 use ChrisHarrison\VoGenerator\ExtensionHandler\DefaultExtensionHandler;
 use ChrisHarrison\VoGenerator\ExtensionHandler\ExtensionHandler;
 use ChrisHarrison\VoGenerator\InternalEvaluator\DefaultInternalEvaluator;

@@ -34,6 +34,8 @@ final class DefaultConfigParserTest extends TestCase
     public function test_type_system_is_conformed_to()
     {
         $pathfinder = $this->prophesize(Pathfinder::class);
+        $pathfinder->rootPath()->willReturn('ROOT_PATH');
+        $pathfinder->packagePath()->willReturn('PACKAGE_PATH');
 
         $parser = new DefaultConfigParser(
             $pathfinder->reveal(),
@@ -43,12 +45,12 @@ final class DefaultConfigParserTest extends TestCase
             ]
         );
 
-        $this->assertEquals([
+        $this->assertEquals(new Config([
             'abc' => 'two',
-            'def' => ['three']
-        ], $parser->parse(new Config([
+            'def' => ['three'],
+        ]), $parser->parse(new Config([
             'abc' => ['one', 'two'],
-            'def' => 'three'
+            'def' => 'three',
         ])));
     }
 }
