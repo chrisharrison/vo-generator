@@ -19,28 +19,6 @@ This library is inspired by James Sanders' [valueobject-generator](https://githu
 
 VOML syntax is loosely based on GraphQL.
 
-## VOML (Valueobject Markup Language)
+## Documentation
 
-Simple values
-```
-integer NumberOfStarships
-string StarshipName
-boolean IsStarshipStarfleet
-uuid StarshipId
-datetime StarshipLaunchTime
-```
-
-## Configuration
-
-## Loading value objects
-
-### Autoloading
-### Manual rendering
-
-## Extending value object functionality
-
-### Traits
-
-### Hooks
-
-## Custom types
+Documentation is available on the [wiki](https://github.com/chrisharrison/vo-generator/wiki).
