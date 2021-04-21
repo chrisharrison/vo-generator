@@ -1,9 +1,15 @@
 # vo-generator
 
-A PHP 7 value object generator.
+A PHP 7/8 value object generator.
 
 [![Build Status](https://travis-ci.org/chrisharrison/vo-generator.svg?branch=master)](https://travis-ci.org/chrisharrison/vo-generator)
 [![Version](https://img.shields.io/packagist/v/chrisharrison/vo-generator.svg)](https://packagist.org/packages/chrisharrison/vo-generator)
+
+## Comaptibility ##
+
+* PHP 7 compatibility: 1.x.x
+
+* PHP 8 compatibility: 2.x.x
 
 ## Installation ##
 
