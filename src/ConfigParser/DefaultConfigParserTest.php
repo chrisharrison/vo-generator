@@ -30,7 +30,7 @@ final class DefaultConfigParserTest extends TestCase
             'test2' => 'ROOT_PATH/test',
         ], $parsedConfig->all());
     }
-    
+
     public function test_type_system_is_conformed_to()
     {
         $pathfinder = $this->prophesize(Pathfinder::class);

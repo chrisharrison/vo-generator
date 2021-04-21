@@ -21,7 +21,7 @@ final class EnrichmentExtension implements Extension
 
     public function extend(Definition $definition): Definition
     {
-        foreach($this->enrichments as $enrichment) {
+        foreach ($this->enrichments as $enrichment) {
             $attributes = $enrichment->getAttributes();
             foreach ($attributes as $attribute) {
                 if (in_array($definition->name()->toString(), $attribute->getArguments())) {
