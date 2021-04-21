@@ -6,5 +6,8 @@ namespace ChrisHarrison\VoGenerator;
 
 interface Entity extends HasInternalProperties
 {
-    public function id(): ValueObject;
+    /**
+     * @return ValueObject
+     */
+    public function id();
 }

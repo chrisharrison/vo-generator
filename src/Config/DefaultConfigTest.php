@@ -16,6 +16,7 @@ final class DefaultConfigTest extends TestCase
             'templateDirs' => ['{packagePath}/templates'],
             'definitionsRoot' => '{rootPath}',
             'fileExtension' => 'voml',
+            'enrichments' => ['{rootPath}/enrichments'],
         ], $config->all());
     }
 }

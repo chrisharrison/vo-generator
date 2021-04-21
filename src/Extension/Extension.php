@@ -8,5 +8,5 @@ use ChrisHarrison\VoGenerator\Definition\Definition;
 
 interface Extension
 {
-    public function extend(Definition $definition): ?Definition;
+    public function extend(Definition $definition): Definition;
 }

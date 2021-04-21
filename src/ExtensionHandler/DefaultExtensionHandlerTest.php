@@ -23,33 +23,24 @@ final class DefaultExtensionHandlerTest extends TestCase
             ]),
         ]);
 
-        $makeExtendFunction = function (string $suffix) {
-            return function (array $args) use ($suffix) {
-                /* @var Definition $definition */
-                $definition = $args[0];
-                return $definition->withMergedPayload(['name' => $definition->name()->toString() . $suffix]);
-            };
+        $extendFunction = function (array $args) {
+            /* @var Definition $definition */
+            $definition = $args[0];
+            return $definition->withMergedPayload(['name' => $definition->name()->toString() . '_extended']);
         };
 
         $extension1 = $this->prophesize(Extension::class);
-        $extension1->extend(Argument::any())->will($makeExtendFunction('1'));
-        $extension2 = $this->prophesize(Extension::class);
-        $extension2->extend(Argument::any())->will($makeExtendFunction('2'));
+        $extension1->extend(Argument::any())->will($extendFunction);
 
         $handler = new DefaultExtensionHandler([
             $extension1->reveal(),
-            $extension2->reveal(),
         ]);
 
         $result = $handler->extend($definitions);
 
         $this->assertEquals([
-            ['name' => 'base1'],
-            ['name' => 'base11'],
-            ['name' => 'base12'],
-            ['name' => 'base2'],
-            ['name' => 'base21'],
-            ['name' => 'base22'],
+            ['name' => 'base1_extended'],
+            ['name' => 'base2_extended'],
         ], array_map(function (Definition $definition) {
             return $definition->payload();
         }, $result->toArray()));

@@ -16,6 +16,8 @@ use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\Parser\Defau
 use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\Parser\Parser;
 use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\Parser\VomlParser;
 use ChrisHarrison\VoGenerator\DefinitionLoader\VomlDefinitionLoader\VomlDefinitionLoader;
+use ChrisHarrison\VoGenerator\EnrichmentLoader\EnrichmentLoader;
+use ChrisHarrison\VoGenerator\Extension\EnrichmentExtension;
 use ChrisHarrison\VoGenerator\ExtensionHandler\DefaultExtensionHandler;
 use ChrisHarrison\VoGenerator\ExtensionHandler\ExtensionHandler;
 use ChrisHarrison\VoGenerator\InternalEvaluator\DefaultInternalEvaluator;
@@ -99,7 +101,10 @@ final class DefaultApp implements App
                 );
             },
             ExtensionHandler::class => function (Container $c) {
-                return new DefaultExtensionHandler([]);
+                $enrichments = (new EnrichmentLoader($c->get(Config::class)->get('enrichments')))->load();
+                return new DefaultExtensionHandler([
+                    new EnrichmentExtension($enrichments),
+                ]);
             },
             Registry::class => function (Container $c) {
                 return new DefaultRegistry(

@@ -15,6 +15,7 @@ final class DefaultConfig extends AbstractConfig
             'templateDirs' => ['{packagePath}/templates'],
             'definitionsRoot' => '{rootPath}',
             'fileExtension' => 'voml',
+            'enrichments' => ['{rootPath}/enrichments'],
         ];
     }
 }

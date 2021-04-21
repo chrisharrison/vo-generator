@@ -46,6 +46,11 @@ final class Definitions
         return new Definitions(array_merge($this->definitions, $definitions->definitions));
     }
 
+    public function count(): int
+    {
+        return count($this->definitions);
+    }
+
     /**
      * @return Definition[]
      */
