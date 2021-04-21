@@ -10,7 +10,7 @@ use ChrisHarrison\VoGenerator\Extension\Extension;
 
 final class DefaultExtensionHandler implements ExtensionHandler
 {
-    private $extensions;
+    private array $extensions;
 
     public function __construct(array $extensions)
     {

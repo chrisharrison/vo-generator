@@ -12,9 +12,9 @@ use ChrisHarrison\VoGenerator\Registry\Registry;
 
 final class DefaultInternalEvaluator implements InternalEvaluator
 {
-    private $codeStreamer;
-    private $registry;
-    private $namespace;
+    private CodeStreamer $codeStreamer;
+    private Registry $registry;
+    private string $namespace;
 
     public function __construct(
         CodeStreamer $codeStreamer,

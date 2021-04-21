@@ -8,7 +8,7 @@ class {{ name }} implements ValueObject
 {%  endfor %}
     use HookComposition;
 
-    private $value;
+    private ?bool $value;
 
     protected function __construct(?bool $value)
     {
@@ -17,26 +17,17 @@ class {{ name }} implements ValueObject
         }, '__construct', $value);
     }
 
-    /**
-     * @return bool
-     */
     public function isNull(): bool
     {
         return $this->value === null;
     }
 
-    /**
-     * @return bool
-     */
     public function isNotNull(): bool
     {
         return !$this->isNull();
     }
 
-    /**
-     * @return static
-     */
-    public static function null()
+    public static function null(): static
     {
         return new self(null);
     }
@@ -44,7 +35,7 @@ class {{ name }} implements ValueObject
     /**
      * @return bool|null
      */
-    public function toNative()
+    public function toNative(): mixed
     {
         return $this->value;
     }
@@ -53,7 +44,7 @@ class {{ name }} implements ValueObject
      * @param ?bool $native
      * @return static
      */
-    public static function fromNative($native)
+    public static function fromNative(mixed $native): static
     {
         return new static($native);
     }
@@ -62,7 +53,7 @@ class {{ name }} implements ValueObject
      * @param ?bool $native
      * @return static
      */
-    public function whenNull($native)
+    public function whenNull(mixed $native): static
     {
         if ($this->isNull()) {
             return static::fromNative($native);
@@ -73,7 +64,7 @@ class {{ name }} implements ValueObject
     /**
      * @return static
      */
-    public static function true()
+    public static function true(): static
     {
         return new static(true);
     }
@@ -81,7 +72,7 @@ class {{ name }} implements ValueObject
     /**
      * @return static
      */
-    public static function false()
+    public static function false(): static
     {
         return new static(false);
     }

@@ -6,47 +6,12 @@ namespace ChrisHarrison\VoGenerator;
 
 interface ValueObject
 {
-    /**
-     * @return bool
-     */
     public function isNull(): bool;
-
-    /**
-     * @return bool
-     */
     public function isNotNull(): bool;
-
-    /**
-     * @param ValueObject $compare
-     * @return bool
-     */
     public function isSame(ValueObject $compare): bool;
-
-    /**
-     * @param ValueObject $compare
-     * @return bool
-     */
     public function isNotSame(ValueObject $compare): bool;
-
-    /**
-     * @param mixed $native
-     * @return mixed
-     */
-    public static function fromNative($native);
-
-    /**
-     * @return mixed
-     */
-    public function toNative();
-
-    /**
-     * @return static
-     */
-    public static function null();
-
-    /**
-     * @param mixed $native
-     * @return static
-     */
-    public function whenNull($native);
+    public static function fromNative(mixed $native): static;
+    public function toNative(): mixed;
+    public static function null(): static;
+    public function whenNull(mixed $native): static;
 }

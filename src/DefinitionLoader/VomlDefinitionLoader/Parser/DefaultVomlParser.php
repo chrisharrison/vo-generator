@@ -8,7 +8,7 @@ use ChrisHarrison\VoGenerator\Definition\Definitions;
 
 final class DefaultVomlParser implements VomlParser
 {
-    private $parser;
+    private Parser $parser;
 
     public function __construct(Parser $parser)
     {

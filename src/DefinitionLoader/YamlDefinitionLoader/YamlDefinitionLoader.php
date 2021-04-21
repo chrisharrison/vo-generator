@@ -14,8 +14,8 @@ use Symfony\Component\Yaml\Yaml;
 
 final class YamlDefinitionLoader implements DefinitionLoader
 {
-    private $rootPath;
-    private $fileExtension;
+    private string $rootPath;
+    private string $fileExtension;
 
     public function __construct(
         string $rootPath,

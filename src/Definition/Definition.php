@@ -6,7 +6,7 @@ namespace ChrisHarrison\VoGenerator\Definition;
 
 final class Definition
 {
-    private $payload;
+    private array $payload;
 
     public function __construct(array $payload)
     {

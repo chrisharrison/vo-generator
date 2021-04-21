@@ -9,7 +9,7 @@
   ],
   "license": "MIT",
   "require": {
-    "php": ">=7.3",
+    "php": "^8.0",
     "twig/twig": "^3.0",
     "symfony/yaml": "^5.0",
     "php-di/php-di": "^6.0",

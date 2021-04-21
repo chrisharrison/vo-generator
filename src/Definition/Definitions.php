@@ -8,7 +8,7 @@ use InvalidArgumentException;
 
 final class Definitions
 {
-    private $definitions;
+    private array $definitions;
 
     private $mapping;
 

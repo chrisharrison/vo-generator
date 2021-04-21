@@ -10,7 +10,7 @@ class {{ name }} implements {{ implements|implements }}
 {%  endfor %}
     use HookComposition;
 
-    private $set;
+    private array $set;
 
     protected function __construct(array $set)
     {
@@ -58,7 +58,7 @@ class {{ name }} implements {{ implements|implements }}
      * @param array $native
      * @return static
      */
-    public static function fromNative($native)
+    public static function fromNative(mixed $native): static
     {
         return new static(array_map(function ($value) {
             if ($value instanceof ValueObject) {
@@ -71,7 +71,7 @@ class {{ name }} implements {{ implements|implements }}
     /**
      * @return static
      */
-    public static function null()
+    public static function null(): static
     {
         return new static([]);
     }
@@ -79,7 +79,7 @@ class {{ name }} implements {{ implements|implements }}
     /**
      * @return array
      */
-    public function toNative()
+    public function toNative(): mixed
     {
         return array_map(function ({{ holds }} $value) {
             return $value->toNative();
@@ -98,7 +98,7 @@ class {{ name }} implements {{ implements|implements }}
      * @param array $native
      * @return static
      */
-    public function whenNull($native)
+    public function whenNull(mixed $native): static
     {
         if ($this->isNull()) {
             return static::fromNative($native);
@@ -286,7 +286,7 @@ class {{ name }} implements {{ implements|implements }}
 
     public function reduceToStatic(callable $reduce): {{ name }}
     {
-        return new static(array_reduce($this->set, $reduce, {{ name }}::null()));
+        return new static((array) array_reduce($this->set, $reduce, {{ name }}::null()));
     }
 
     public function random(): {{ holds }}

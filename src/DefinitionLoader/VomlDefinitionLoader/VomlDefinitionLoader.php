@@ -13,9 +13,9 @@ use SplFileInfo;
 
 final class VomlDefinitionLoader implements DefinitionLoader
 {
-    private $parser;
-    private $rootPath;
-    private $fileExtension;
+    private VomlParser $parser;
+    private string $rootPath;
+    private string $fileExtension;
 
     public function __construct(
         VomlParser $parser,

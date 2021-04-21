@@ -10,8 +10,8 @@ use Noodlehaus\ConfigInterface;
 
 final class DefaultConfigParser implements ConfigParser
 {
-    private $pathfinder;
-    private $types;
+    private Pathfinder $pathfinder;
+    private array $types;
 
     public function __construct(
         Pathfinder $pathfinder,
@@ -28,11 +28,7 @@ final class DefaultConfigParser implements ConfigParser
         return new Config($this->parseValue($configItems));
     }
 
-    /**
-     * @param string|array $value
-     * @return string|array
-     */
-    private function parseValue($value)
+    private function parseValue(string|array $value): string|array
     {
         if (is_array($value)) {
             return array_map(function ($innerValue) {

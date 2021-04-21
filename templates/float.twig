@@ -8,7 +8,7 @@ class {{ name}} implements ValueObject
 {%  endfor %}
     use HookComposition;
 
-    private $value;
+    private ?float $value;
 
     protected function __construct(?float $value)
     {
@@ -36,7 +36,7 @@ class {{ name}} implements ValueObject
     /**
      * @return static
      */
-    public static function null()
+    public static function null(): static
     {
         return new self(null);
     }
@@ -44,7 +44,7 @@ class {{ name}} implements ValueObject
     /**
      * @return float|null
      */
-    public function toNative()
+    public function toNative(): mixed
     {
         return $this->value;
     }
@@ -53,7 +53,7 @@ class {{ name}} implements ValueObject
      * @param ?float $native
      * @return static
      */
-    public static function fromNative($native)
+    public static function fromNative(mixed $native): static
     {
         return new static($native);
     }
@@ -62,7 +62,7 @@ class {{ name}} implements ValueObject
      * @param ?float $native
      * @return static
      */
-    public function whenNull($native)
+    public function whenNull(mixed $native): static
     {
         if ($this->isNull()) {
             return static::fromNative($native);

@@ -12,13 +12,13 @@ use ChrisHarrison\VoGenerator\TypeHandler\TypeHandler;
 
 final class DefaultRegistry implements Registry
 {
-    private $definitions;
-    private $extensionHandler;
-    private $typeHandler;
-    private $renderer;
-    private $namespace;
+    private Definitions $definitions;
+    private ExtensionHandler $extensionHandler;
+    private TypeHandler $typeHandler;
+    private Renderer $renderer;
+    private string $namespace;
 
-    private $position;
+    private int $position;
 
     public function __construct(
         Definitions $definitions,
@@ -86,11 +86,7 @@ final class DefaultRegistry implements Registry
         $this->position = 0;
     }
 
-    /**
-     * @param callable $filterMethod
-     * @return static
-     */
-    public function filter(callable $filterMethod)
+    public function filter(callable $filterMethod): static
     {
         $clone = clone $this;
         $clone->definitions = new Definitions(

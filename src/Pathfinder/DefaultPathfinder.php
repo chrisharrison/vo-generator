@@ -17,6 +17,7 @@ final class DefaultPathfinder implements Pathfinder
                 return realpath(dirname($rootLocation) . '/../');
             }
         }
+        return '';
     }
 
     public function packagePath(): string

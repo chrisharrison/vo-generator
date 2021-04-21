@@ -10,7 +10,7 @@ class {{ name }} implements {{ implements|implements }}
 {%  endfor %}
     use HookComposition;
 
-    private $payload;
+    private array $payload;
 
     {% for property in properties %}
     public function {{ property.propertyName }}(): {{ property.name }}
@@ -24,7 +24,7 @@ class {{ name }} implements {{ implements|implements }}
     * @param {{ property.name }} ${{ property.propertyName }}
     * @return static
     */
-    public function with{{ property.propertyName|ucfirst }}({{ property.name }} ${{ property.propertyName }})
+    public function with{{ property.propertyName|ucfirst }}({{ property.name }} ${{ property.propertyName }}): static
     {
         $clone = clone $this;
         $clone->payload['{{ property.propertyName }}'] = ${{ property.propertyName }}->toNative();
@@ -122,7 +122,7 @@ class {{ name }} implements {{ implements|implements }}
     /**
      * @return array
      */
-    public function toNative()
+    public function toNative(): mixed
     {
         return array_reduce(array_keys(static::properties()), function (array $acc, string $property) {
             $propertyType = static::properties()[$property];
@@ -135,12 +135,12 @@ class {{ name }} implements {{ implements|implements }}
      * @param ?array $native
      * @return static
      */
-    public static function fromNative($native)
+    public static function fromNative(mixed $native): static
     {
         return new static($native);
     }
 
-    public static function null()
+    public static function null(): static
     {
         return new static([]);
     }
@@ -149,7 +149,7 @@ class {{ name }} implements {{ implements|implements }}
      * @param ?array $native
      * @return static
      */
-    public function whenNull($native)
+    public function whenNull(mixed $native): static
     {
         if ($this->isNull()) {
             return static::fromNative($native);

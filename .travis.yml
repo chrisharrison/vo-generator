@@ -1,6 +1,6 @@
 language: php
 php:
-  - '7.3'
+  - '8.0'
 install: composer install --no-interaction
 script:
   #    Check coding standards
@@ -8,7 +8,7 @@ script:
   #    Run tests
   - ./vendor/bin/phpunit
 branches:
-  only: master
+  only: [master]
 cache:
   directories:
     - vendor

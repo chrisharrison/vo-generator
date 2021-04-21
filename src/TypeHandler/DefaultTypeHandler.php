@@ -10,12 +10,13 @@ use Psr\Container\ContainerInterface;
 
 final class DefaultTypeHandler implements TypeHandler
 {
-    private $container;
+    private ContainerInterface $container;
 
     /** @var string[] */
-    private $types;
+    private array $types;
 
-    private $builtTypes;
+    /** @var ?Type[] */
+    private ?array $builtTypes = null;
 
     public function __construct(
         ContainerInterface $container,
@@ -40,7 +41,7 @@ final class DefaultTypeHandler implements TypeHandler
      */
     private function builtTypes(): array
     {
-        if ($this->builtTypes) {
+        if ($this->builtTypes !== null) {
             return $this->builtTypes;
         }
         return $this->builtTypes = array_map(function (string $typeHandlerName) {
