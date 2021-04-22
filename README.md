@@ -5,7 +5,7 @@ A PHP 7/8 value object generator.
 [![Build Status](https://travis-ci.org/chrisharrison/vo-generator.svg?branch=master)](https://travis-ci.org/chrisharrison/vo-generator)
 [![Version](https://img.shields.io/packagist/v/chrisharrison/vo-generator.svg)](https://packagist.org/packages/chrisharrison/vo-generator)
 
-## Comaptibility ##
+## Compatibility ##
 
 * PHP 7 compatibility: 1.x.x
 
