@@ -31,7 +31,7 @@
     "files": ["autoload.php"]
   },
   "bin": [
-    "bin/generate"
+    "bin/vogen"
   ],
   "minimum-stability": "dev",
   "prefer-stable": true,
