@@ -21,13 +21,15 @@ class {{ name }} implements {{ implements|implements }}
 
     {% for property in properties %}
     /**
-    * @param {{ property.name }} ${{ property.propertyName }}
+    * @param mixed ${{ property.propertyName }}
     * @return static
     */
-    public function with{{ property.propertyName|ucfirst }}({{ property.name }} ${{ property.propertyName }}): static
+    public function with{{ property.propertyName|ucfirst }}(mixed ${{ property.propertyName }}): static
     {
+        $value = (${{ property.propertyName }} instanceof {{ property.name }}) ? ${{ property.propertyName }}->toNative() : ${{ property.propertyName }};
+
         $clone = clone $this;
-        $clone->payload['{{ property.propertyName }}'] = ${{ property.propertyName }}->toNative();
+        $clone->payload['{{ property.propertyName }}'] = $value;
         return $clone;
     }
     {% endfor %}
