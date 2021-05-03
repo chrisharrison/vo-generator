@@ -170,6 +170,16 @@ class {{ name }} implements {{ implements|implements }}
         return $this->set[$index];
     }
 
+    public function first(): {{ holds }}
+    {
+        return $this->set[0] ?? {{ holds }}::null();
+    }
+
+    public function last(): {{ holds }}
+    {
+        return $this->set[$this->count() - 1] ?? {{ holds }}::null();
+    }
+
     public function map(callable $mapper): {{ name }}
     {
         $items = [];
@@ -177,6 +187,13 @@ class {{ name }} implements {{ implements|implements }}
             $items[] = $mapper($item, $key);
         }
         return new static($items);
+    }
+
+    public function iterate(callable $iterator): void
+    {
+        foreach ($this->set as $key => $item) {
+            $iterator($item, $key);
+        }
     }
 
     public function find(callable $finder): {{ name }}
