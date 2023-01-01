@@ -160,7 +160,7 @@ class {{ name }} implements {{ implements|implements }}
         return !$this->isSame($compare);
     }
 
-    public function count()
+    public function count(): int
     {
         return count($this->set);
     }
