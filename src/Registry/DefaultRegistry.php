@@ -59,29 +59,29 @@ final class DefaultRegistry implements Registry
         );
     }
 
-    public function current()
+    public function current(): ?string
     {
         return $this->resolve(
             $this->namespace . '\\' . $this->definitions->toArray()[$this->position]->name()->toString()
         );
     }
 
-    public function next()
+    public function next(): void
     {
         ++$this->position;
     }
 
-    public function key()
+    public function key(): int
     {
         return $this->position;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return (array_key_exists($this->position, $this->definitions->toArray()));
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         $this->position = 0;
     }
