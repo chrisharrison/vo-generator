@@ -8,7 +8,7 @@ use Noodlehaus\AbstractConfig;
 
 final class DefaultConfig extends AbstractConfig
 {
-    protected function getDefaults()
+    protected function getDefaults(): array
     {
         return [
             'namespace' => 'ValueObjects',
